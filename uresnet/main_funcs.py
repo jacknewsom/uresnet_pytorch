@@ -11,6 +11,7 @@ from uresnet.iotools import io_factory
 from uresnet.trainval import trainval
 import uresnet.utils as utils
 import torch
+import time
 
 
 def iotest(flags):
@@ -90,7 +91,7 @@ def prepare(flags):
     # Log save directory
     if flags.LOG_DIR:
         if not os.path.exists(flags.LOG_DIR): os.mkdir(flags.LOG_DIR)
-        logname = '%s/train_log-%07d.csv' % (flags.LOG_DIR, loaded_iteration)
+        logname = '%s/train_log-bs:%d,it:%d, %s.csv' % (flags.LOG_DIR, flags.BATCH_SIZE, flags.ITERATION, time.strftime('%d %b %Y  %H:%M:%S', time.gmtime())
         if not flags.TRAIN:
             logname = '%s/inference_log-%07d.csv' % (flags.LOG_DIR, loaded_iteration)
         handlers.csv_logger = utils.CSVData(logname)
