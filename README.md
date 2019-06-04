@@ -1,5 +1,5 @@
 # uresnet_pytorch
-PyTorch implementations of dense and sparse UResNet retrofitted to run on NERSC (or any system without GPU support). Based on https://github.com/Temigo/uresnet_pytorch.
+PyTorch implementations of dense and sparse UResNet retrofitted to run on the Cori system at NERSC (or any system without GPU support). Based on https://github.com/Temigo/uresnet_pytorch.
 
 ## Running UResnet
 
