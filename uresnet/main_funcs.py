@@ -65,12 +65,12 @@ def prepare(flags):
     # IO configuration
     handlers.data_io = io_factory(flags)
     handlers.data_io.initialize()
-    if 'sparse' in flags.IO_TYPE:
-        handlers.data_io.start_threads()
-        handlers.data_io.next()
-    if 'sparse' in flags.MODEL_NAME and 'sparse' not in flags.IO_TYPE:
-        sys.stderr.write('Sparse UResNet needs sparse IO.')
-        sys.exit(1)
+#    if 'sparse' in flags.IO_TYPE:
+#        handlers.data_io.start_threads()
+#        handlers.data_io.next()
+#    if 'sparse' in flags.MODEL_NAME and 'sparse' not in flags.IO_TYPE:
+#        sys.stderr.write('Sparse UResNet needs sparse IO.')
+#        sys.exit(1)
 
     # Trainer configuration
     flags.NUM_CHANNEL = handlers.data_io.num_channels()
@@ -81,8 +81,8 @@ def prepare(flags):
     loaded_iteration = 0
     if not flags.FULL:
         loaded_iteration   = handlers.trainer.initialize()
-        if flags.TRAIN: handlers.iteration = loaded_iteration
-
+        if flags.TRAIN: 
+            handlers.iteration = loaded_iteration
     # Weight save directory
     if flags.WEIGHT_PREFIX:
         save_dir = flags.WEIGHT_PREFIX[0:flags.WEIGHT_PREFIX.rfind('/')]
@@ -91,7 +91,7 @@ def prepare(flags):
     # Log save directory
     if flags.LOG_DIR:
         if not os.path.exists(flags.LOG_DIR): os.mkdir(flags.LOG_DIR)
-        logname = '%s/train_log-bs:%d,it:%d, %s.csv' % (flags.LOG_DIR, flags.BATCH_SIZE, flags.ITERATION, time.strftime('%d %b %Y  %H:%M:%S', time.gmtime())
+        logname = '%s/train_log-bs:%d,it:%d, %s.csv' % (flags.LOG_DIR, flags.BATCH_SIZE, flags.ITERATION, time.strftime('%d %b %Y  %H:%M:%S', time.gmtime()))
         if not flags.TRAIN:
             logname = '%s/inference_log-%07d.csv' % (flags.LOG_DIR, loaded_iteration)
         handlers.csv_logger = utils.CSVData(logname)
@@ -139,7 +139,7 @@ def log(handlers, tstamp_iteration, tspent_iteration, tsum, res, flags, epoch):
 
     # Report (stdout)
     if report_step:
-        loss_seg = utils.round_decimals(loss_seg,   4)
+        loss_seg = utils.round_decimals(loss_seg, 4)
         tmap  = handlers.trainer.tspent
         tfrac = utils.round_decimals(tmap['train']/tspent_iteration*100., 2)
         tabs  = utils.round_decimals(tmap['train'], 3)
@@ -277,7 +277,6 @@ def full_inference_loop(flags, handlers):
         idx, blob = handlers.data_io.next()
         idx_v.append(idx)
         blob_v.append(blob)
-
     for weight in weights:
         handlers.trainer._flags.MODEL_PATH = weight
         loaded_iteration   = handlers.trainer.initialize()

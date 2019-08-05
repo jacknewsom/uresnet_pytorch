@@ -1,8 +1,12 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+from .hdf5_loader import linear_train_loader
+import numpy as np
 import sys
 import time
+import h5py
+import os
 
 class io_base(object):
 
@@ -22,6 +26,7 @@ class io_base(object):
         self._blob = {}
         self.tspent_io = 0
         self.tspent_sum_io = 0
+        self.loader = self._loader(flags.INPUT_FILE[0])
         
     def blob(self):
         return self._blob
@@ -50,13 +55,35 @@ class io_base(object):
     def stop_threads(self):
         raise NotImplementedError
 
-    def next(self,buffer_id=-1,release=True):
+    def _loader(self, directory):
         tstart = time.time()
-        res = self._next(buffer_id,release)
-        self.tspent_io = time.time() - tstart
-        self.tspent_sum_io += self.tspent_io
-        return res
-    
+        print('directory', directory)
+        print(os.listdir(directory))
+        for f in os.listdir(directory):
+            filename = directory + f
+            if not os.path.isfile(filename):
+                print(filename, "not a file")
+                continue
+            elif filename[-5:] != '.hdf5':
+                continue
+            print('good filename', filename)
+
+            for d, c, f, l, nepe in linear_train_loader(filename, self._flags.BATCH_SIZE):
+                self._num_entries = len(nepe)
+                idx = [np.array(nepe)]
+                blob = {}
+                blob['voxels'] = [c]
+                blob['data'] = [np.hstack((c, f))]
+                blob['feature'] = [f]
+                blob['label'] = [l]
+                self.tspent_io = time.time() - tstart
+                tstart = time.time()
+                self.tspent_sum_io += self.tspent_io
+                yield idx, blob
+
+    def next(self, buffer_id=-1, release=True):
+        return next(self.loader)
+        
     def _next(self,buffer_id=-1,release=True):
         raise NotImplementedError
     

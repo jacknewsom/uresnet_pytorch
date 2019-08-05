@@ -150,10 +150,11 @@ class trainval(object):
                 raise ValueError
             print('Restoring weights from %s...' % self._flags.MODEL_PATH)
             with open(self._flags.MODEL_PATH, 'rb') as f:
-                checkpoint = torch.load(f)
-                self._net.load_state_dict(checkpoint['state_dict'])
+                checkpoint = torch.load(f, map_location='cpu')
+                self._net.load_state_dict(checkpoint['state_dict'], strict=False)
                 self._optimizer.load_state_dict(checkpoint['optimizer'])
+                for g in self._optimizer.param_groups:
+                    g['lr'] = self._flags.LEARNING_RATE
                 iteration = checkpoint['global_step'] + 1
             print('Done.')
-
         return iteration
