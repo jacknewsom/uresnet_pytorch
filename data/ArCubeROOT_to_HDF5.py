@@ -57,31 +57,14 @@ def get_entries_per_event(argon, start, end):
     return num_entries_per_event
 
 def raw_arcube_file_loader(argon, batch_size):
-    for start_index in range(0, 1000 // batch_size, batch_size):
+    # iterate up to 1000 in iterations of size batch_size
+    for start_index in range(0, 1000, batch_size):
         num_entries_per_event = get_entries_per_event(argon, start_index, start_index+batch_size)
         total_entries = sum(num_entries_per_event)
         coordinates = np.empty((total_entries, 4))
         features = np.empty((total_entries, 1))
         labels = np.empty((total_entries, 1))
         c_ind = 0
-        '''
-        i = 0
-        for ev in argon:
-            if i in list(range(start_index, start_index+batch_size)):
-                end = c_ind+num_entries_per_event[i-start_index]
-                x, y, z = list(ev.xq), list(ev.yq), list(ev.zq)
-                pid, energies = list(ev.pidq), list(ev.dq)
-                _labels = [pdg_to_kazu_coding(p) for p in pid]
-                coordinates[c_ind: end, 0] = x
-                coordinates[c_ind: end, 1] = y
-                coordinates[c_ind: end, 2] = z
-                coordinates[c_ind: end, 3] = i-start_index
-
-                features[c_ind: end] = np.array(energies).reshape((len(energies), 1))
-                labels[c_ind: end] = np.array(_labels).reshape((len(_labels), 1))
-                c_ind += len(x)
-            i += 1
-        '''
         for i in range(start_index, start_index+batch_size):
             argon.GetEntry(i)
             end = c_ind+num_entries_per_event[i-start_index]
